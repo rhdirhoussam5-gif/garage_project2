@@ -1,0 +1,77 @@
+/* ── Auth Pages (Login & Register) ──────────────────────────────────────────── */
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+  padding: 1rem;
+}
+
+.auth-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 430px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+
+.auth-logo {
+  font-size: 2.5rem;
+  color: #1a73e8;
+}
+
+.auth-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.auth-subtitle {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-bottom: 1.75rem;
+}
+
+.auth-card .form-control {
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid #dee2e6;
+  font-size: 0.9rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.auth-card .form-control:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26,115,232,.15);
+}
+
+.auth-card .btn-primary {
+  border-radius: 8px;
+  padding: 0.7rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.auth-divider {
+  text-align: center;
+  color: #adb5bd;
+  font-size: 0.8rem;
+  margin: 1.25rem 0;
+  position: relative;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #dee2e6;
+}
+
+.auth-divider::before { left: 0; }
+.auth-divider::after  { right: 0; }

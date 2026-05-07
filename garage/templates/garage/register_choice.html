@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Choose Account Type - MSLog</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'garage/css/auth.css' %}"/>
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card" style="max-width: 920px;">
+    <div class="text-center mb-4">
+      <div class="auth-logo"><i class="bi bi-person-plus-fill"></i></div>
+      <h1 class="auth-title mt-2">Choose Your Account Type</h1>
+      <p class="auth-subtitle">Vehicle owners see only their own records. Mechanics manage the garage.</p>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="border rounded-4 h-100 p-4">
+          <div class="text-center mb-3">
+            <i class="bi bi-car-front-fill text-primary" style="font-size: 2.5rem;"></i>
+          </div>
+          <h2 class="h5 text-center mb-3">Vehicle Owner</h2>
+          <p class="text-muted small mb-3">
+            Add your vehicles, book appointments, follow interventions, and download your invoices.
+          </p>
+          <div class="d-grid">
+            <a href="{% url 'register_owner' %}" class="btn btn-primary">Register as Owner</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="border rounded-4 h-100 p-4">
+          <div class="text-center mb-3">
+            <i class="bi bi-tools text-success" style="font-size: 2.5rem;"></i>
+          </div>
+          <h2 class="h5 text-center mb-3">Mechanic</h2>
+          <p class="text-muted small mb-3">
+            Access the full garage dashboard, manage vehicles, create interventions, and issue invoices.
+          </p>
+          <div class="d-grid">
+            <a href="{% url 'register_mechanic' %}" class="btn btn-success">Register as Mechanic</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-center small mt-4 mb-0">
+      Already have an account? <a href="{% url 'login' %}">Sign in</a>
+    </p>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

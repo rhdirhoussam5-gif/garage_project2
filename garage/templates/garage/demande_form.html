@@ -1,0 +1,37 @@
+{% extends 'garage/base.html' %}
+{% block title %}Service Request — MSLog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title"><i class="bi bi-clipboard-plus text-primary me-2"></i>New Service Request</h1>
+</div>
+<div class="card mb-3 p-3 bg-light border-0">
+  <p class="mb-0 small">
+    For vehicle: <strong class="text-primary">{{ vehicle.matricule }}</strong>
+    — {{ vehicle.marque }} {{ vehicle.modele }}
+  </p>
+</div>
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card p-4">
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger small">{{ field.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-arrow-right me-1"></i>Next: Add Intervention
+          </button>
+          <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

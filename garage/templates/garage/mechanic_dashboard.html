@@ -1,0 +1,129 @@
+{% extends 'garage/base.html' %}
+{% load static %}
+{% block title %}Dashboard — MSLog{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'garage/css/dashboard.css' %}"/>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title"><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard</h1>
+  <span class="text-muted small">Welcome, {{ request.user.get_full_name|default:request.user.username }}</span>
+</div>
+
+<!-- Stats row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card p-3">
+      <div class="text-muted small mb-1">Total Vehicles</div>
+      <div class="stat-value text-primary">{{ total_vehicles }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card green p-3">
+      <div class="text-muted small mb-1">Interventions</div>
+      <div class="stat-value text-success">{{ total_interventions }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card yellow p-3">
+      <div class="text-muted small mb-1">Pending Requests</div>
+      <div class="stat-value text-warning">{{ pending_demandes }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card p-3 bg-primary text-white">
+      <div class="small mb-2">Quick Actions</div>
+      <a href="{% url 'vehicle_add' %}"   class="btn btn-light btn-sm mb-1 w-100">
+        <i class="bi bi-plus me-1"></i>Add Vehicle
+      </a>
+      <a href="{% url 'rendezvous_add' %}" class="btn btn-light btn-sm w-100">
+        <i class="bi bi-calendar-plus me-1"></i>New Appointment
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Recent interventions -->
+  <div class="col-lg-7">
+    <div class="card p-4">
+      <h6 class="fw-bold mb-3">
+        <i class="bi bi-clock-history text-primary me-1"></i>Recent Interventions
+      </h6>
+      {% if recent_interventions %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Plate</th><th>Type</th><th>Date</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in recent_interventions %}
+            <tr>
+              <td><strong class="text-primary">{{ inv.demande.vehicule.matricule }}</strong></td>
+              <td>{{ inv.type_intervention }}</td>
+              <td>{{ inv.date_debut|date:"Y-m-d" }}</td>
+              <td>
+                <span class="badge rounded-pill
+                  {% if inv.etat == 'done' %}bg-success
+                  {% elif inv.etat == 'ongoing' %}bg-warning text-dark
+                  {% else %}bg-secondary{% endif %}">
+                  {{ inv.get_etat_display }}
+                </span>
+                {% if inv.is_overdue %}<span class="badge bg-danger ms-1">OVERDUE</span>{% endif %}
+                <!-- OPTIONAL FEATURE: Progress Bar -->
+              <div class="progress mt-1" style="height: 4px;" title="Progress: {{ inv.progress_percent }}%">
+                <div class="progress-bar custom-progress-bar {% if inv.progress_percent == 100 %}bg-success{% endif %}" role="progressbar" data-width="{{ inv.progress_percent }}"></div>
+              </div>
+              </td>
+              <td>
+                <a href="{% url 'intervention_detail' inv.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-muted mb-0">No interventions yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Upcoming appointments -->
+  <div class="col-lg-5">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">
+          <i class="bi bi-calendar-check text-primary me-1"></i>Upcoming Appointments
+        </h6>
+        <a href="{% url 'rendezvous_list' %}" class="btn btn-sm btn-outline-primary">All</a>
+      </div>
+      {% if upcoming_rdv %}
+        {% for rdv in upcoming_rdv %}
+        <div class="rdv-row {% if rdv.statut == 'confirmed' %}confirmed{% elif rdv.statut == 'cancelled' %}cancelled{% endif %} mb-2">
+          <div class="fw-semibold small">{{ rdv.vehicule.matricule }}</div>
+          <div class="text-muted small">
+            {{ rdv.date_rdv|date:"Y-m-d H:i" }} — {{ rdv.motif }}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted mb-0">No upcoming appointments.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.custom-progress-bar').forEach(el => {
+      el.style.width = el.getAttribute('data-width') + '%';
+    });
+  });
+</script>
+{% endblock %}

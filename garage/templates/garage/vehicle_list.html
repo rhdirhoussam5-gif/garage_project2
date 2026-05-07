@@ -1,0 +1,49 @@
+{% extends 'garage/base.html' %}
+{% block title %}{% if is_mechanic %}Vehicles{% else %}My Vehicles{% endif %} — MSLog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title"><i class="bi bi-car-front text-primary me-2"></i>{% if is_mechanic %}Vehicles{% else %}My Vehicles{% endif %}</h1>
+  <a href="{% url 'vehicle_add' %}" class="btn btn-primary">
+    <i class="bi bi-plus me-1"></i>Add Vehicle
+  </a>
+</div>
+<div class="card p-3">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr>
+        <th>License Plate</th><th>Brand</th><th>Model</th>
+        <th>Year</th><th>Mileage</th>{% if is_mechanic %}<th>Owner</th>{% endif %}<th></th>
+      </tr></thead>
+      <tbody>
+        {% for v in vehicles %}
+        <tr>
+          <td>
+            {% if v.photo %}
+            <img src="{{ v.photo.url }}" alt="Photo" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-right: 8px;">
+            {% endif %}
+            <strong class="text-primary">{{ v.matricule }}</strong>
+          </td>
+          <td>{{ v.marque }}</td>
+          <td>{{ v.modele }}</td>
+          <td>{{ v.annee }}</td>
+          <td>{{ v.kilometrage_actuel }} km</td>
+          {% if is_mechanic %}
+          <td>{% if v.proprietaire %}{{ v.proprietaire.user.get_full_name|default:v.proprietaire.user.username }}{% else %}—{% endif %}</td>
+          {% endif %}
+          <td class="text-end">
+            <a href="{% url 'vehicle_detail' v.pk %}" class="btn btn-sm btn-outline-primary me-1">
+              <i class="bi bi-eye"></i>
+            </a>
+            <a href="{% url 'vehicle_edit' v.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="{% if is_mechanic %}7{% else %}6{% endif %}" class="text-center text-muted py-4">No vehicles registered yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

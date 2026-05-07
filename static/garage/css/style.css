@@ -1,0 +1,217 @@
+/* ── Design System & Global Layout ─────────────────────────────────────────── */
+
+:root {
+  --primary:      #1a73e8;
+  --primary-dark: #1558b0;
+  --secondary:    #6c757d;
+  --success:      #28a745;
+  --warning:      #ffc107;
+  --danger:       #dc3545;
+  --light-bg:     #f4f6fb;
+  --sidebar-bg:   #1a1a2e;
+  --sidebar-link: #adb5bd;
+  --card-radius:  14px;
+  --shadow:       0 2px 16px rgba(0,0,0,.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--light-bg);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #212529;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────────── */
+
+.sidebar {
+  width: 230px;
+  min-width: 230px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-brand {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 0 0.5rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: 1rem;
+}
+
+.sidebar a {
+  color: var(--sidebar-link);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  font-size: 0.9rem;
+  transition: background .2s, color .2s;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.sidebar hr {
+  border-color: rgba(255,255,255,.1);
+  margin: 0.75rem 0;
+}
+
+/* ── Main Content ─────────────────────────────────────────────────────────────── */
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  min-width: 0; /* prevents overflow */
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────────── */
+
+.card {
+  border: none;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow);
+  background: #ffffff;
+}
+
+.stat-card {
+  border-left: 4px solid var(--primary);
+}
+
+.stat-card.green  { border-color: var(--success); }
+.stat-card.yellow { border-color: var(--warning); }
+.stat-card.red    { border-color: var(--danger);  }
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────────── */
+
+.table thead th {
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--secondary);
+  border-bottom: 2px solid #e9ecef;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────────────── */
+
+.badge-status {
+  font-size: 0.75rem;
+  padding: 0.35em 0.75em;
+  border-radius: 50px;
+  font-weight: 600;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────────── */
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+/* ── Page Header ─────────────────────────────────────────────────────────────── */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ── Alerts ──────────────────────────────────────────────────────────────────── */
+
+.alert {
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+/* ── Mobile top bar ──────────────────────────────────────────────────────────── */
+
+.mobile-topbar {
+  display: none;
+  background: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  margin-bottom: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .sidebar       { display: none !important; }
+  .mobile-topbar { display: flex !important; }
+  .main-content  { padding: 1rem; }
+  .stat-value    { font-size: 1.5rem; }
+}
+
+/* ── Timeline (intervention history) ─────────────────────────────────────────── */
+
+.timeline-item {
+  border-left: 3px solid var(--primary);
+  padding-left: 1rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.timeline-item::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--primary);
+  border-radius: 50%;
+  position: absolute;
+  left: -6.5px;
+  top: 4px;
+}
+
+/* ── Invoice / Facture ───────────────────────────────────────────────────────── */
+
+.invoice-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+  padding: 2rem;
+}
+
+.invoice-total {
+  font-size: 1.75rem;
+  font-weight: 700;
+}

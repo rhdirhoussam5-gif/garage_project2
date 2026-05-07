@@ -1,0 +1,89 @@
+{% extends 'garage/base.html' %}
+{% load static %}
+{% block title %}Intervention #{{ intervention.pk }} — MSLog{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'garage/css/dashboard.css' %}"/>{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Intervention #{{ intervention.pk }}</h1>
+  <div>
+    <button onclick="window.print()" class="btn btn-outline-dark btn-sm me-2 d-print-none">
+      <i class="bi bi-printer"></i> Print Job Card
+    </button>
+    <a href="{% url 'vehicle_detail' intervention.demande.vehicule.pk %}"
+       class="btn btn-outline-secondary btn-sm d-print-none">← Back to Vehicle</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-7">
+    <div class="card p-4 mb-3">
+      <h6 class="text-muted mb-3">Details</h6>
+      <table class="table table-sm">
+        <tr><th>Type</th><td>{{ intervention.type_intervention }}</td></tr>
+        <tr><th>Date</th><td>{{ intervention.date_debut|date:"Y-m-d H:i" }}</td></tr>
+        <tr><th>Mileage</th><td>{{ intervention.kilometrage }} km</td></tr>
+        <tr><th>Status</th>
+          <td><span class="badge {% if intervention.etat == 'done' %}bg-success{% elif intervention.etat == 'ongoing' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+            {{ intervention.get_etat_display }}</span>
+          </td>
+        </tr>
+        <tr><th>Mechanic</th><td>{{ intervention.mecanicien.user.get_full_name|default:"—" }}</td></tr>
+        <tr><th>Labour</th><td>{{ intervention.cout_main_oeuvre }} MAD</td></tr>
+        <tr><th>Parts</th><td>{{ intervention.total_parts_cost }} MAD</td></tr>
+        <tr><th>Total</th><td><strong>{{ intervention.total_cost }} MAD</strong></td></tr>
+      </table>
+      <h6 class="mt-3">Work Description</h6>
+      <p>{{ intervention.description_travaux }}</p>
+      {% if intervention.diagnostic %}
+        <h6>Diagnostic</h6>
+        <p class="text-muted">{{ intervention.diagnostic }}</p>
+      {% endif %}
+      <!-- Invoice action -->
+      <hr class="d-print-none">
+      <div class="d-print-none">
+      {% if facture %}
+        <a href="{% url 'facture_detail' facture.pk %}" class="btn btn-success btn-sm me-2">
+          <i class="bi bi-receipt me-1"></i>View Invoice
+        </a>
+        <a href="{% url 'facture_pdf' facture.pk %}" class="btn btn-outline-danger btn-sm">
+          <i class="bi bi-file-pdf me-1"></i>Download Invoice PDF
+        </a>
+      {% elif is_mechanic %}
+        <a href="{% url 'facture_create' intervention.pk %}" class="btn btn-outline-success btn-sm">
+          <i class="bi bi-plus-circle me-1"></i>Generate Invoice
+        </a>
+      {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5 d-print-none">
+    <div class="card p-4">
+      <h6 class="text-muted mb-3">Attached Files</h6>
+      {% if intervention.fichiers.all %}
+        <div class="thumb-grid mb-3">
+          {% for f in intervention.fichiers.all %}
+            <a href="{{ f.fichier.url }}" target="_blank" title="{{ f.description }}">
+              <img src="{{ f.fichier.url }}" alt="{{ f.description }}">
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small">No files yet.</p>
+      {% endif %}
+      {% if is_mechanic %}
+      <hr>
+      <h6>Upload File</h6>
+      <form method="post" action="{% url 'upload_file' intervention.pk %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ upload_form.fichier }}
+        <div class="mt-2">{{ upload_form.description }}</div>
+        <button type="submit" class="btn btn-sm btn-primary mt-2">
+          <i class="bi bi-upload me-1"></i>Upload
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

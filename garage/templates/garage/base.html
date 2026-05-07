@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Mechanic Service Log{% endblock %}</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'garage/css/style.css' %}"/>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<div class="d-flex">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+  <nav class="sidebar d-print-none">
+    <div class="sidebar-brand">
+      <i class="bi bi-wrench-adjustable-circle me-2"></i>MSLog
+    </div>
+
+    {% if is_mechanic %}
+    <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+    {% endif %}
+    {% if is_owner %}
+    <a href="{% url 'client_dashboard' %}" {% if request.resolver_match.url_name == 'client_dashboard' %}class="active"{% endif %}>
+      <i class="bi bi-person-circle"></i> My Dashboard
+    </a>
+    {% endif %}
+    <a href="{% url 'vehicle_list' %}" {% if 'vehicle' in request.resolver_match.url_name or request.resolver_match.url_name == 'client_dashboard' %}class="active"{% endif %}>
+      <i class="bi bi-car-front"></i> {% if is_mechanic %}Vehicles{% else %}My Vehicles{% endif %}
+    </a>
+    <a href="{% url 'vehicle_add' %}" {% if request.resolver_match.url_name == 'vehicle_add' %}class="active"{% endif %}>
+      <i class="bi bi-plus-circle"></i> Add Vehicle
+    </a>
+    <a href="{% url 'rendezvous_list' %}" {% if 'rendezvous' in request.resolver_match.url_name      %}class="active"{% endif %}>
+      <i class="bi bi-calendar-check"></i> Appointments
+    </a>
+    <a href="{% url 'rendezvous_add' %}" {% if request.resolver_match.url_name == 'rendezvous_add' %}class="active"{% endif %}>
+      <i class="bi bi-calendar-plus"></i> New Appointment
+    </a>
+
+    <hr/>
+    <a href="{% url 'logout' %}" class="mt-auto">
+      <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
+  </nav>
+
+  <!-- ── Main content ───────────────────────────────────────────── -->
+  <div class="main-content">
+
+    <!-- Mobile top bar -->
+    <div class="mobile-topbar d-print-none">
+      <span class="fw-bold"><i class="bi bi-wrench-adjustable-circle text-primary me-1"></i> MSLog</span>
+      <div class="d-flex gap-2">
+        {% if is_mechanic %}
+        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-speedometer2"></i></a>
+        {% else %}
+        <a href="{% url 'client_dashboard' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-person-circle"></i></a>
+        {% endif %}
+        <a href="{% url 'vehicle_list' %}"   class="btn btn-sm btn-outline-primary"><i class="bi bi-car-front"></i></a>
+        <a href="{% url 'rendezvous_list' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-calendar-check"></i></a>
+        <a href="{% url 'logout' %}"          class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- Flash messages handled by SweetAlert -->
+    {% if messages %}
+      <div id="django-messages" class="d-none">
+        {% for message in messages %}
+          <div data-tag="{{ message.tags }}">{{ message|escapejs }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+</div><!-- end flex wrapper -->
+
+{% else %}
+  {% block public_content %}{% endblock %}
+{% endif %}
+
+<!-- Bootstrap & SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const messages = document.querySelectorAll('#django-messages div');
+    if (messages.length > 0) {
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+      });
+
+      messages.forEach(msg => {
+        let tag = msg.getAttribute('data-tag');
+        let icon = 'info';
+        if (tag.includes('success')) icon = 'success';
+        if (tag.includes('error')) icon = 'error';
+        if (tag.includes('warning')) icon = 'warning';
+        
+        Toast.fire({
+          icon: icon,
+          title: msg.innerText
+        });
+      });
+    }
+  });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

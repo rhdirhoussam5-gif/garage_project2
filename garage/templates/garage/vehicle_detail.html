@@ -1,0 +1,95 @@
+{% extends 'garage/base.html' %}
+{% load static %}
+{% block title %}{{ vehicle.matricule }} — MSLog{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'garage/css/dashboard.css' %}"/>{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="bi bi-car-front text-primary me-2"></i>
+    {{ vehicle.marque }} {{ vehicle.modele }}
+    <span class="badge bg-primary ms-2">{{ vehicle.matricule }}</span>
+  </h1>
+  <div class="d-flex gap-2">
+    <a href="{% url 'export_history_pdf' vehicle.matricule %}" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-file-pdf me-1"></i>PDF
+    </a>
+    <a href="{% url 'vehicle_edit' vehicle.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-pencil"></i>
+    </a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card p-3 h-100">
+      <h6 class="text-muted mb-3">Vehicle Info</h6>
+      <table class="table table-sm mb-0">
+        <tr><th>License Plate</th><td class="text-primary fw-bold">{{ vehicle.matricule }}</td></tr>
+        <tr><th>Brand</th><td>{{ vehicle.marque }}</td></tr>
+        <tr><th>Model</th><td>{{ vehicle.modele }}</td></tr>
+        <tr><th>Year</th><td>{{ vehicle.annee }}</td></tr>
+        <tr><th>Mileage</th><td>{{ vehicle.kilometrage_actuel }} km</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-3 h-100 d-flex flex-column">
+      <h6 class="text-muted mb-3">Owner</h6>
+      {% if vehicle.proprietaire %}
+        <p class="mb-1 fw-bold">{{ vehicle.proprietaire.user.get_full_name }}</p>
+        <p class="text-muted small">{{ vehicle.proprietaire.telephone }}</p>
+      {% else %}
+        <p class="text-muted">No owner linked.</p>
+      {% endif %}
+      <div class="mt-auto d-flex gap-2">
+        <a href="{% url 'demande_add' vehicle.pk %}" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-circle me-1"></i>New Service Request
+        </a>
+        <a href="{% url 'rendezvous_add' %}" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-calendar-plus me-1"></i>Book Appointment
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upcoming appointments -->
+{% if rdvs %}
+<div class="card p-3 mb-4">
+  <h6 class="fw-bold mb-3"><i class="bi bi-calendar-check text-primary me-1"></i>Appointments</h6>
+  {% for rdv in rdvs %}
+  <div class="rdv-row {{ rdv.statut }}">
+    <span class="fw-semibold small">{{ rdv.date_rdv|date:"Y-m-d H:i" }}</span>
+    — {{ rdv.motif }}
+    <span class="badge bg-secondary ms-2">{{ rdv.get_statut_display }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Interventions -->
+<h6 class="fw-bold mb-3"><i class="bi bi-clock-history text-primary me-1"></i>Maintenance History</h6>
+{% for inv in interventions %}
+<div class="card mb-3 p-3">
+  <div class="d-flex justify-content-between">
+    <strong>{{ inv.type_intervention }}</strong>
+    <span class="badge
+      {% if inv.etat == 'done' %}bg-success
+      {% elif inv.etat == 'ongoing' %}bg-warning text-dark
+      {% else %}bg-secondary{% endif %}">
+      {{ inv.get_etat_display }}
+    </span>
+  </div>
+  <div class="text-muted small">
+    {{ inv.date_debut|date:"Y-m-d" }} &bull; {{ inv.kilometrage }} km
+  </div>
+  <p class="mt-2 mb-2 small">{{ inv.description_travaux }}</p>
+  <div class="d-flex justify-content-between align-items-center">
+    <small class="text-muted">Total: {{ inv.total_cost }} MAD</small>
+    <a href="{% url 'intervention_detail' inv.pk %}" class="btn btn-sm btn-outline-primary">Details</a>
+  </div>
+</div>
+{% empty %}
+<div class="alert alert-light">No interventions recorded yet.</div>
+{% endfor %}
+{% endblock %}

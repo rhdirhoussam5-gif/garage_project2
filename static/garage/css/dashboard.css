@@ -1,0 +1,80 @@
+/* ── Dashboard & Inner Pages ─────────────────────────────────────────────────── */
+
+/* Search bar on public page */
+.search-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #1a73e8 100%);
+  padding: 4rem 1rem;
+  text-align: center;
+  color: white;
+}
+
+.search-hero h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.search-box {
+  max-width: 560px;
+  margin: 1.5rem auto 0;
+}
+
+.search-box .form-control {
+  border-radius: 50px 0 0 50px;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  border: none;
+  box-shadow: none;
+}
+
+.search-box .btn {
+  border-radius: 0 50px 50px 0;
+  padding: 0.75rem 1.75rem;
+  font-weight: 600;
+}
+
+/* Vehicle result card on search page */
+.vehicle-card {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* Appointment calendar row */
+.rdv-row {
+  border-left: 4px solid #1a73e8;
+  background: #f8f9ff;
+  border-radius: 0 10px 10px 0;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.rdv-row.confirmed { border-color: #28a745; background: #f0fff4; }
+.rdv-row.cancelled { border-color: #dc3545; background: #fff5f5; }
+.rdv-row.completed { border-color: #6c757d; background: #f8f9fa; }
+
+/* Intervention image thumbnails */
+.thumb-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.thumb-grid img {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  transition: transform .2s;
+}
+
+.thumb-grid img:hover {
+  transform: scale(1.08);
+}
+
+/* Priority badges */
+.priority-low    { background: #d1ecf1; color: #0c5460; }
+.priority-medium { background: #fff3cd; color: #856404; }
+.priority-high   { background: #f8d7da; color: #721c24; }
+.priority-urgent { background: #dc3545; color: #fff;    }

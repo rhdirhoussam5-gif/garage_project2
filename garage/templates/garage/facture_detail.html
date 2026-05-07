@@ -1,0 +1,63 @@
+{% extends 'garage/base.html' %}
+{% load static %}
+{% block title %}Invoice {{ facture.numero_facture }} — MSLog{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'garage/css/dashboard.css' %}"/>{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title"><i class="bi bi-receipt text-primary me-2"></i>Invoice</h1>
+  <a href="{% url 'facture_pdf' facture.pk %}" class="btn btn-danger">
+    <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
+  </a>
+</div>
+
+<div class="card" style="max-width:700px; margin:0 auto;">
+  <div class="invoice-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h4 class="mb-0 fw-bold">INVOICE</h4>
+        <div class="opacity-75 small">{{ facture.numero_facture }}</div>
+      </div>
+      <span class="badge bg-light text-dark fs-6">{{ facture.get_statut_display }}</span>
+    </div>
+    <div class="mt-3 small opacity-90">
+      Vehicle: <strong>{{ facture.intervention.demande.vehicule.matricule }}</strong>
+      — {{ facture.intervention.demande.vehicule.marque }} {{ facture.intervention.demande.vehicule.modele }}
+      <br>Issue Date: {{ facture.date_emission|date:"Y-m-d" }}
+    </div>
+  </div>
+
+  <div class="p-4">
+    <table class="table">
+      <thead><tr><th>Description</th><th class="text-end">Qty</th><th class="text-end">Unit</th><th class="text-end">Total</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Labour — {{ facture.intervention.type_intervention }}</td>
+          <td class="text-end">1</td>
+          <td class="text-end">{{ facture.intervention.cout_main_oeuvre }} MAD</td>
+          <td class="text-end">{{ facture.intervention.cout_main_oeuvre }} MAD</td>
+        </tr>
+        {% for ip in facture.intervention.intervention_pieces.all %}
+        <tr>
+          <td>{{ ip.piece.nom }}</td>
+          <td class="text-end">{{ ip.quantite_utilisee }}</td>
+          <td class="text-end">{{ ip.piece.prix_unitaire }} MAD</td>
+          <td class="text-end">{% widthratio ip.piece.prix_unitaire 1 ip.quantite_utilisee %} MAD</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3" class="text-end">Subtotal</td><td class="text-end">{{ facture.sous_total }} MAD</td></tr>
+        <tr><td colspan="3" class="text-end">VAT ({{ facture.tva_percent }}%)</td><td class="text-end">{{ facture.montant_tva }} MAD</td></tr>
+        <tr class="table-primary fw-bold">
+          <td colspan="3" class="text-end">TOTAL TTC</td>
+          <td class="text-end invoice-total">{{ facture.total_ttc }} MAD</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    {% if facture.notes %}
+    <div class="alert alert-light small mt-2"><strong>Notes:</strong> {{ facture.notes }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

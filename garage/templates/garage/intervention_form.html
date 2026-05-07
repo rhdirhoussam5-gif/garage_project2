@@ -1,0 +1,41 @@
+{% extends 'garage/base.html' %}
+{% block title %}Log Intervention — MSLog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title"><i class="bi bi-tools text-primary me-2"></i>Log Intervention</h1>
+</div>
+<div class="card p-1 mb-3 bg-light border-0">
+  <p class="mb-0 px-3 py-2 small">
+    Vehicle: <strong class="text-primary">{{ demande.vehicule.matricule }}</strong>
+    — {{ demande.vehicule.marque }} {{ demande.vehicule.modele }}
+  </p>
+</div>
+<div class="row justify-content-center">
+  <div class="col-md-9">
+    <div class="card p-4">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          {% for field in form %}
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>Save Intervention
+          </button>
+          <a href="{% url 'vehicle_detail' demande.vehicule.pk %}" class="btn btn-outline-secondary">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

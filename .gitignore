@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Uploaded Media Files (Invoices, Photos)
+media/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Development Tools & OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Environment Variables / Secrets
+.env
+.env.*
+!.env.example

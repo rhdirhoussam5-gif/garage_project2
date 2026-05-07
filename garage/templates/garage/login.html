@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — MSLog</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'garage/css/auth.css' %}"/>
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="text-center mb-4">
+      <div class="auth-logo"><i class="bi bi-wrench-adjustable-circle-fill"></i></div>
+      <h1 class="auth-title mt-2">Mechanic Service Log</h1>
+      <p class="auth-subtitle">Sign in as a mechanic or vehicle owner</p>
+    </div>
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Username</label>
+        {{ form.username }}
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Password</label>
+        {{ form.password }}
+      </div>
+
+      {% if form.errors %}
+        <div class="alert alert-danger py-2 small mb-3">
+          <i class="bi bi-exclamation-circle me-1"></i> Invalid username or password.
+        </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+      </button>
+    </form>
+
+    <div class="auth-divider">or</div>
+
+    <div class="text-center small">
+      <p class="mb-1">
+        <a href="{% url 'register_choice' %}">Create an account</a>
+      </p>
+      <p class="mb-0 text-muted">Choose owner or mechanic registration.</p>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

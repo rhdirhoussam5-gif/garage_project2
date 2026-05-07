@@ -1,0 +1,142 @@
+{% extends 'garage/base.html' %}
+{% load static %}
+{% block title %}My Dashboard - MSLog{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'garage/css/dashboard.css' %}"/>{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title"><i class="bi bi-person-circle text-primary me-2"></i>My Dashboard</h1>
+  <span class="text-muted small">Welcome, {{ request.user.get_full_name|default:request.user.username }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card p-3">
+      <div class="text-muted small mb-1">My Vehicles</div>
+      <div class="stat-value text-primary">{{ my_vehicles|length }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card green p-3">
+      <div class="text-muted small mb-1">Upcoming Appointments</div>
+      <div class="stat-value text-success">{{ upcoming_rdv|length }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-4">
+    <div class="card p-3 bg-primary text-white">
+      <div class="small mb-2">Quick Actions</div>
+      <a href="{% url 'vehicle_add' %}" class="btn btn-light btn-sm mb-1 w-100">
+        <i class="bi bi-plus me-1"></i>Add Vehicle
+      </a>
+      <a href="{% url 'rendezvous_add' %}" class="btn btn-light btn-sm w-100">
+        <i class="bi bi-calendar-plus me-1"></i>Book Appointment
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">
+          <i class="bi bi-car-front text-primary me-1"></i>My Vehicles
+        </h6>
+        <a href="{% url 'vehicle_list' %}" class="btn btn-sm btn-outline-primary">All</a>
+      </div>
+      {% if my_vehicles %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Plate</th><th>Vehicle</th><th>Mileage</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vehicle in my_vehicles %}
+            <tr>
+              <td>
+                {% if vehicle.photo %}
+                  <img src="{{ vehicle.photo.url }}" alt="Photo" style="width: 30px; height: 30px; object-fit: cover; border-radius: 4px; margin-right: 5px;">
+                {% endif %}
+                <strong class="text-primary">{{ vehicle.matricule }}</strong>
+              </td>
+              <td>{{ vehicle.marque }} {{ vehicle.modele }} ({{ vehicle.annee }})</td>
+              <td>{{ vehicle.kilometrage_actuel }} km</td>
+              <td class="text-end">
+                <a href="{% url 'export_history_pdf' vehicle.matricule %}" class="btn btn-sm btn-outline-danger me-1" title="Download Service History PDF"><i class="bi bi-file-pdf"></i></a>
+                <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No vehicles linked to your account yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card p-4 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">
+          <i class="bi bi-calendar-check text-primary me-1"></i>Upcoming Appointments
+        </h6>
+        <a href="{% url 'rendezvous_list' %}" class="btn btn-sm btn-outline-primary">All</a>
+      </div>
+      {% if upcoming_rdv %}
+        {% for rdv in upcoming_rdv %}
+        <div class="rdv-row {% if rdv.statut == 'confirmed' %}confirmed{% elif rdv.statut == 'cancelled' %}cancelled{% endif %} mb-2">
+          <div class="fw-semibold small">{{ rdv.vehicule.matricule }}</div>
+          <div class="text-muted small">{{ rdv.date_rdv|date:"Y-m-d H:i" }} - {{ rdv.motif }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <p class="text-muted mb-0">No upcoming appointments.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-4">
+      <h6 class="fw-bold mb-3">
+        <i class="bi bi-clock-history text-primary me-1"></i>Recent Services
+      </h6>
+      {% if recent_interventions %}
+        {% for intervention in recent_interventions %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-semibold small"><a href="{% url 'intervention_detail' intervention.pk %}">{{ intervention.demande.vehicule.matricule }}</a></div>
+              <div class="text-muted small">{{ intervention.type_intervention }}</div>
+            </div>
+            <div class="text-end">
+              <span class="badge rounded-pill {% if intervention.etat == 'done' %}bg-success{% elif intervention.etat == 'ongoing' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                {{ intervention.get_etat_display }}
+              </span>
+              <!-- OPTIONAL FEATURE: Progress Bar -->
+              <div class="progress mt-1" style="height: 4px;" title="Progress: {{ intervention.progress_percent }}%">
+                <div class="progress-bar custom-progress-bar {% if intervention.progress_percent == 100 %}bg-success{% endif %}" role="progressbar" data-width="{{ intervention.progress_percent }}"></div>
+              </div>
+            </div>
+          </div>
+          <div class="text-muted small mt-1">
+             {{ intervention.date_debut|date:"Y-m-d" }} - {{ intervention.total_cost }} MAD
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <p class="text-muted mb-0">No service history yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.custom-progress-bar').forEach(el => {
+      el.style.width = el.getAttribute('data-width') + '%';
+    });
+  });
+</script>
+{% endblock %}
