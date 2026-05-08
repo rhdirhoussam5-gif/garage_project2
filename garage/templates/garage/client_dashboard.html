@@ -64,6 +64,12 @@
               <td>{{ vehicle.kilometrage_actuel }} km</td>
               <td class="text-end">
                 <a href="{% url 'export_history_pdf' vehicle.matricule %}" class="btn btn-sm btn-outline-danger me-1" title="Download Service History PDF"><i class="bi bi-file-pdf"></i></a>
+                <button type="button" class="btn btn-sm btn-outline-success me-1 request-service-btn" 
+                        data-bs-toggle="modal" data-bs-target="#requestServiceModal" 
+                        data-vehicle-id="{{ vehicle.pk }}" data-vehicle-name="{{ vehicle.marque }} {{ vehicle.modele }}"
+                        title="Request Service">
+                  <i class="bi bi-tools"></i>
+                </button>
                 <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-sm btn-outline-primary">View</a>
               </td>
             </tr>
@@ -130,6 +136,39 @@
     </div>
   </div>
 </div>
+<!-- Request Service Modal -->
+<div class="modal fade" id="requestServiceModal" tabindex="-1" aria-labelledby="requestServiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="requestServiceModalLabel"><i class="bi bi-tools me-2"></i>Request Service</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="requestServiceForm" method="post" action="">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="mb-3">Requesting service for: <strong id="modalVehicleName"></strong></p>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Description of issue</label>
+            {{ demande_form.description_note }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Priority</label>
+            {{ demande_form.priorite }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Preferred Garage (Optional)</label>
+            {{ demande_form.garage }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 {% block extra_js %}
 <script>
@@ -137,6 +176,23 @@
     document.querySelectorAll('.custom-progress-bar').forEach(el => {
       el.style.width = el.getAttribute('data-width') + '%';
     });
+
+    // Handle Request Service Modal
+    const requestServiceModal = document.getElementById('requestServiceModal');
+    if (requestServiceModal) {
+      requestServiceModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const vehicleId = button.getAttribute('data-vehicle-id');
+        const vehicleName = button.getAttribute('data-vehicle-name');
+        
+        const modalTitle = requestServiceModal.querySelector('#modalVehicleName');
+        const form = requestServiceModal.querySelector('#requestServiceForm');
+        
+        modalTitle.textContent = vehicleName;
+        // Construct the URL dynamically to match: path("vehicles/<int:vehicle_pk>/request/", ...)
+        form.action = `/vehicles/${vehicleId}/request/`;
+      });
+    }
   });
 </script>
 {% endblock %}

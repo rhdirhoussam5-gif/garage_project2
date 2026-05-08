@@ -40,6 +40,9 @@
       <a href="{% url 'rendezvous_add' %}" class="btn btn-light btn-sm w-100">
         <i class="bi bi-calendar-plus me-1"></i>New Appointment
       </a>
+      <a href="/admin/" class="btn btn-warning btn-sm mt-2 w-100 text-dark fw-bold">
+        <i class="bi bi-shield-lock-fill me-1"></i>Admin Panel
+      </a>
     </div>
   </div>
 </div>
@@ -91,9 +94,42 @@
       {% endif %}
     </div>
   </div>
-
-  <!-- Upcoming appointments -->
   <div class="col-lg-5">
+    <!-- Pending Requests -->
+    <div class="card p-4 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">
+          <i class="bi bi-exclamation-octagon text-warning me-1"></i>Pending Service Requests
+        </h6>
+        <span class="badge bg-warning text-dark">{{ pending_demandes }} Total</span>
+      </div>
+      {% if pending_requests %}
+        {% for req in pending_requests %}
+        <div class="mb-3 border-bottom pb-2">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-semibold small">{{ req.vehicule.matricule }} — {{ req.vehicule.marque }}</div>
+              <div class="text-muted small">{{ req.description_note|truncatechars:50 }}</div>
+            </div>
+            <div class="text-end">
+              <span class="badge {% if req.priorite == 'urgent' %}bg-danger{% elif req.priorite == 'high' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %} mb-1">
+                {{ req.get_priorite_display }}
+              </span>
+              <br>
+              <a href="{% url 'intervention_add' req.pk %}" class="btn btn-sm btn-primary">Process</a>
+            </div>
+          </div>
+          <div class="text-muted extra-small mt-1">
+             Received: {{ req.date_creation|date:"Y-m-d H:i" }}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted mb-0">No pending requests.</p>
+      {% endif %}
+    </div>
+
+    <!-- Upcoming appointments -->
     <div class="card p-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0">

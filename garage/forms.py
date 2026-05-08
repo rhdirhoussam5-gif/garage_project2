@@ -8,6 +8,7 @@ from .models import (
     FileUpload,
     Intervention,
     Mecanicien,
+    Piece,
     Proprietaire,
     RendezVous,
     Vehicule,
@@ -191,3 +192,17 @@ class RendezVousForm(forms.ModelForm):
         self.fields["mecanicien"].queryset = Mecanicien.objects.select_related("user").order_by(
             "user__first_name", "user__last_name", "user__username"
         )
+
+
+class PieceForm(forms.ModelForm):
+    class Meta:
+        model = Piece
+        fields = ["garage", "reference", "nom", "prix_unitaire", "quantite_stock", "photo"]
+        widgets = {
+            "garage": forms.Select(attrs={"class": "form-select"}),
+            "reference": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. PRT-123"}),
+            "nom": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Brake Pads"}),
+            "prix_unitaire": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "quantite_stock": forms.NumberInput(attrs={"class": "form-control"}),
+            "photo": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
+        }

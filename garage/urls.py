@@ -19,6 +19,7 @@ urlpatterns = [
     path("vehicles/<int:vehicle_pk>/request/", views.demande_add, name="demande_add"),
     path("demande/<int:demande_pk>/intervention/add/", views.intervention_add, name="intervention_add"),
     path("interventions/<int:pk>/", views.intervention_detail, name="intervention_detail"),
+    path("interventions/<int:pk>/add-piece/", views.intervention_add_piece, name="intervention_add_piece"),
     path("interventions/<int:intervention_pk>/upload/", views.upload_file, name="upload_file"),
     path("interventions/<int:intervention_pk>/invoice/create/", views.facture_create, name="facture_create"),
     path("invoices/<int:pk>/", views.facture_detail, name="facture_detail"),
@@ -27,4 +28,11 @@ urlpatterns = [
     path("appointments/add/", views.rendezvous_add, name="rendezvous_add"),
     path("appointments/<int:pk>/edit/", views.rendezvous_edit, name="rendezvous_edit"),
     path("history/<str:matricule>/pdf/", views.export_history_pdf, name="export_history_pdf"),
+    
+    # Pieces
+    path("inventory/", views.piece_list, name="piece_list"),
+    path("inventory/add/", views.piece_add, name="piece_add"),
+    path("inventory/<int:pk>/edit/", views.piece_edit, name="piece_edit"),
+    path("inventory/<int:pk>/delete/", views.piece_delete, name="piece_delete"),
+    path("inventory/<int:pk>/buy/", views.piece_buy, name="piece_buy"),
 ]

@@ -1,0 +1,68 @@
+{% extends 'garage/base.html' %}
+
+{% block title %}{{ title }} - MSLog{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow-sm border-0 mt-4">
+      <div class="card-header bg-primary text-white py-3">
+        <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>{{ title }}</h5>
+      </div>
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Part Name</label>
+            {{ form.nom }}
+            {% if form.nom.errors %}<div class="text-danger small">{{ form.nom.errors|join:", " }}</div>{% endif %}
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Reference</label>
+              {{ form.reference }}
+              {% if form.reference.errors %}<div class="text-danger small">{{ form.reference.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Garage</label>
+              {{ form.garage }}
+              {% if form.garage.errors %}<div class="text-danger small">{{ form.garage.errors|join:", " }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Unit Price (MAD)</label>
+              {{ form.prix_unitaire }}
+              {% if form.prix_unitaire.errors %}<div class="text-danger small">{{ form.prix_unitaire.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Stock Quantity</label>
+              {{ form.quantite_stock }}
+              {% if form.quantite_stock.errors %}<div class="text-danger small">{{ form.quantite_stock.errors|join:", " }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Part Photo</label>
+            {{ form.photo }}
+            <div class="form-text">Choose an image of the part.</div>
+            {% if form.photo.errors %}<div class="text-danger small">{{ form.photo.errors|join:", " }}</div>{% endif %}
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <a href="{% url 'piece_list' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i>Back to Inventory
+            </a>
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-check2-circle me-1"></i>Save Part
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

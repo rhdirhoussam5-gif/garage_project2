@@ -17,8 +17,9 @@ from .forms import (
     ProprietaireRegisterForm,
     RendezVousForm,
     VehiculeForm,
+    PieceForm,
 )
-from .models import Demande, Facturation, Intervention, Mecanicien, Proprietaire, RendezVous, Vehicule
+from .models import Demande, Facturation, Intervention, InterventionPiece, Mecanicien, Piece, Proprietaire, RendezVous, Vehicule
 
 
 def is_mechanic(user):
@@ -121,7 +122,7 @@ def dashboard(request):
 
     total_vehicles = Vehicule.objects.count()
     total_interventions = Intervention.objects.count()
-    pending_demandes = Demande.objects.filter(statut="pending").count()
+    pending_requests = Demande.objects.filter(statut="pending").select_related("vehicule").order_by("-date_creation")
     upcoming_rdv = RendezVous.objects.filter(
         statut__in=["scheduled", "confirmed"],
         date_rdv__gte=timezone.now(),
@@ -134,7 +135,8 @@ def dashboard(request):
         {
             "total_vehicles": total_vehicles,
             "total_interventions": total_interventions,
-            "pending_demandes": pending_demandes,
+            "pending_demandes": pending_requests.count(),
+            "pending_requests": pending_requests,
             "upcoming_rdv": upcoming_rdv,
             "recent_interventions": recent_interventions,
         },
@@ -171,6 +173,7 @@ def client_dashboard(request):
             "my_vehicles": my_vehicles,
             "upcoming_rdv": upcoming_rdv,
             "recent_interventions": recent_interventions,
+            "demande_form": DemandeForm(),
         },
     )
 
@@ -337,6 +340,7 @@ def intervention_detail(request, pk):
             "intervention": intervention,
             "upload_form": FileUploadForm(),
             "facture": facture,
+            "all_pieces": Piece.objects.filter(quantite_stock__gt=0) if is_mechanic(request.user) else [],
         },
     )
 
@@ -357,6 +361,41 @@ def upload_file(request, intervention_pk):
         else:
             messages.error(request, "Only image files are allowed.")
     return redirect("intervention_detail", pk=intervention_pk)
+
+
+@login_required
+def intervention_add_piece(request, pk):
+    if not is_mechanic(request.user):
+        return HttpResponseForbidden("Only mechanics can add pieces to interventions.")
+    
+    intervention = get_object_or_404(Intervention, pk=pk)
+    
+    if request.method == "POST":
+        piece_id = request.POST.get("piece_id")
+        quantity = int(request.POST.get("quantity", 1))
+        
+        piece = get_object_or_404(Piece, pk=piece_id)
+        
+        if piece.quantite_stock < quantity:
+            messages.error(request, f"Not enough stock for {piece.nom}. Available: {piece.quantite_stock}")
+        else:
+            # Check if piece already added to this intervention
+            ip, created = InterventionPiece.objects.get_or_create(
+                intervention=intervention, 
+                piece=piece,
+                defaults={'quantite_utilisee': quantity}
+            )
+            if not created:
+                ip.quantite_utilisee += quantity
+                ip.save()
+            
+            # Decrement stock
+            piece.quantite_stock -= quantity
+            piece.save()
+            
+            messages.success(request, f"Added {quantity}x {piece.nom} to intervention.")
+            
+    return redirect("intervention_detail", pk=pk)
 
 
 @login_required
@@ -666,3 +705,119 @@ def export_history_pdf(request, matricule):
     response = HttpResponse(buffer, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="history_{vehicle.matricule}.pdf"'
     return response
+
+
+# ─── Piece Management ─────────────────────────────────────────────────────────
+
+@login_required
+def piece_list(request):
+    pieces = Piece.objects.select_related('garage').order_by('nom')
+    return render(request, "garage/piece_list.html", {"pieces": pieces})
+
+
+@login_required
+def piece_add(request):
+    if not is_mechanic(request.user):
+        return HttpResponseForbidden("Access denied. Only mechanics can add parts.")
+    
+    form = PieceForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Part added successfully.")
+        return redirect("piece_list")
+    
+    return render(request, "garage/piece_form.html", {"form": form, "title": "Add New Part"})
+
+
+@login_required
+def piece_edit(request, pk):
+    if not is_mechanic(request.user):
+        return HttpResponseForbidden("Access denied. Only mechanics can edit parts.")
+    
+    piece = get_object_or_404(Piece, pk=pk)
+    form = PieceForm(request.POST or None, request.FILES or None, instance=piece)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"Part '{piece.nom}' updated.")
+        return redirect("piece_list")
+    
+    return render(request, "garage/piece_form.html", {"form": form, "title": f"Edit Part: {piece.nom}"})
+
+
+@login_required
+def piece_delete(request, pk):
+    if not is_mechanic(request.user):
+        return HttpResponseForbidden("Access denied. Only mechanics can delete parts.")
+    
+    piece = get_object_or_404(Piece, pk=pk)
+    if request.method == "POST":
+        nom = piece.nom
+        piece.delete()
+        messages.success(request, f"Part '{nom}' deleted.")
+        return redirect("piece_list")
+    
+    return render(request, "garage/piece_confirm_delete.html", {"piece": piece})
+
+
+@login_required
+def piece_buy(request, pk):
+    if not is_owner(request.user):
+        return HttpResponseForbidden("Access denied. Only vehicle owners can buy parts.")
+    
+    piece = get_object_or_404(Piece, pk=pk)
+    
+    if piece.quantite_stock <= 0:
+        messages.error(request, f"Sorry, '{piece.nom}' is out of stock.")
+        return redirect("piece_list")
+    
+    proprietaire = request.user.proprietaire
+    vehicle = Vehicule.objects.filter(proprietaire=proprietaire).first()
+    
+    if not vehicle:
+        messages.error(request, "You need to register a vehicle before buying parts.")
+        return redirect("vehicle_add")
+    
+    # Create a simple "Purchase" flow
+    # 1. Create a hidden service request
+    demande = Demande.objects.create(
+        vehicule=vehicle,
+        garage=piece.garage,
+        description_note=f"Direct purchase of {piece.nom}",
+        statut="completed",
+        priorite="low"
+    )
+    
+    # 2. Create the intervention (service)
+    intervention = Intervention.objects.create(
+        demande=demande,
+        date_debut=timezone.now(),
+        date_fin=timezone.now(),
+        type_intervention="Part Purchase",
+        description_travaux=f"Sold part: {piece.nom}",
+        etat="done",
+        cout_main_oeuvre=0,
+        kilometrage=vehicle.kilometrage_actuel
+    )
+    
+    # 3. Link the piece to the intervention
+    InterventionPiece.objects.create(
+        intervention=intervention,
+        piece=piece,
+        quantite_utilisee=1
+    )
+    
+    # 4. Create invoice
+    auto_number = f"INV-PURCH-{timezone.now().year}-{Facturation.objects.count() + 1:04d}"
+    Facturation.objects.create(
+        intervention=intervention,
+        numero_facture=auto_number,
+        statut="issued",
+        notes=f"Invoice for purchase of {piece.nom}"
+    )
+    
+    # 5. Decrement stock
+    piece.quantite_stock -= 1
+    piece.save()
+    
+    messages.success(request, f"You successfully purchased '{piece.nom}'! An invoice has been generated.")
+    return redirect("piece_list")

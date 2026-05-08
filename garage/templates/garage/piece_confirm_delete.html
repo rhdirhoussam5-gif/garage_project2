@@ -1,0 +1,30 @@
+{% extends 'garage/base.html' %}
+
+{% block title %}Delete Part - MSLog{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4 text-center">
+    <div class="card shadow-sm border-0 mt-5">
+      <div class="card-body p-4">
+        <div class="text-danger mb-3">
+          <i class="bi bi-exclamation-triangle" style="font-size: 4rem;"></i>
+        </div>
+        <h3 class="fw-bold mb-3">Are you sure?</h3>
+        <p class="text-muted mb-4">
+          You are about to delete the part <strong>"{{ piece.nom }}"</strong> (Ref: {{ piece.reference }}). 
+          This action cannot be undone.
+        </p>
+        
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger">Yes, Delete Part</button>
+            <a href="{% url 'piece_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

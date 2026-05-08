@@ -38,6 +38,57 @@
         <h6>Diagnostic</h6>
         <p class="text-muted">{{ intervention.diagnostic }}</p>
       {% endif %}
+
+      <hr>
+      <h6 class="fw-bold mb-3"><i class="bi bi-box-seam me-2 text-primary"></i>Parts Used</h6>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Part Name</th>
+              <th class="text-center">Qty</th>
+              <th class="text-end">Price</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ip in intervention.intervention_pieces.all %}
+            <tr>
+              <td>{{ ip.piece.nom }} <small class="text-muted">({{ ip.piece.reference }})</small></td>
+              <td class="text-center">{{ ip.quantite_utilisee }}</td>
+              <td class="text-end">{{ ip.piece.prix_unitaire }} MAD</td>
+              <td class="text-end">{{ ip.total_line_cost|default:0 }} MAD</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-muted text-center py-3">No parts used yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_mechanic %}
+      <div class="mt-3 p-3 bg-light rounded border">
+        <h6 class="small fw-bold mb-2">Add Part from Inventory</h6>
+        <form method="post" action="{% url 'intervention_add_piece' intervention.pk %}" class="row g-2">
+          {% csrf_token %}
+          <div class="col-8">
+            <select name="piece_id" class="form-select form-select-sm" required>
+              <option value="" selected disabled>-- Select Part --</option>
+              {% for p in all_pieces %}
+                <option value="{{ p.id }}">{{ p.nom }} (Stock: {{ p.quantite_stock }}) - {{ p.prix_unitaire }} MAD</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-2">
+            <input type="number" name="quantity" class="form-control form-control-sm" value="1" min="1" required>
+          </div>
+          <div class="col-2">
+            <button type="submit" class="btn btn-sm btn-primary w-100">Add</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+
       <!-- Invoice action -->
       <hr class="d-print-none">
       <div class="d-print-none">

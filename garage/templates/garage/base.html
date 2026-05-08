@@ -47,6 +47,9 @@
     <a href="{% url 'rendezvous_add' %}" {% if request.resolver_match.url_name == 'rendezvous_add' %}class="active"{% endif %}>
       <i class="bi bi-calendar-plus"></i> New Appointment
     </a>
+    <a href="{% url 'piece_list' %}" {% if 'piece' in request.resolver_match.url_name %}class="active"{% endif %}>
+      <i class="bi bi-box-seam"></i> Inventory
+    </a>
 
     <hr/>
     <a href="{% url 'logout' %}" class="mt-auto">

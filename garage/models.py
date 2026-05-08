@@ -192,6 +192,10 @@ class InterventionPiece(models.Model):
     def __str__(self):
         return f"{self.quantite_utilisee}x {self.piece.nom} in Intervention #{self.intervention.pk}"
 
+    @property
+    def total_line_cost(self):
+        return self.piece.prix_unitaire * self.quantite_utilisee
+
 
 class TacheIntervention(models.Model):
     """Specific task checklist for an intervention."""

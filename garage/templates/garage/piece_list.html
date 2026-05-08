@@ -1,0 +1,89 @@
+{% extends 'garage/base.html' %}
+{% load static %}
+
+{% block title %}Inventory - MSLog{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+  <div>
+    <h1 class="page-title"><i class="bi bi-box-seam text-primary me-2"></i>Spare Parts Inventory</h1>
+    <p class="text-muted small mb-0">Manage and browse the garage parts catalog.</p>
+  </div>
+  {% if is_mechanic %}
+  <a href="{% url 'piece_add' %}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i>Add New Part
+  </a>
+  {% endif %}
+</div>
+
+<div class="row g-4 mt-2">
+  {% if pieces %}
+    {% for piece in pieces %}
+    <div class="col-md-6 col-lg-4 col-xl-3">
+      <div class="card h-100 shadow-sm border-0 piece-card">
+        {% if piece.photo %}
+          <img src="{{ piece.photo.url }}" class="card-img-top" alt="{{ piece.nom }}" style="height: 180px; object-fit: cover;">
+        {% else %}
+          <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+            <i class="bi bi-image" style="font-size: 3rem;"></i>
+          </div>
+        {% endif %}
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="card-title fw-bold mb-0 text-truncate" title="{{ piece.nom }}">{{ piece.nom }}</h6>
+            <span class="badge bg-primary rounded-pill">{{ piece.prix_unitaire }} MAD</span>
+          </div>
+          <p class="text-muted extra-small mb-3">Ref: {{ piece.reference }}</p>
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="stock-info">
+              <span class="small {% if piece.quantite_stock < 5 %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                <i class="bi bi-stack me-1"></i>Stock: {{ piece.quantite_stock }}
+              </span>
+            </div>
+            <div class="garage-info text-muted extra-small">
+              <i class="bi bi-geo-alt me-1"></i>{{ piece.garage.nom }}
+            </div>
+          </div>
+        </div>
+        {% if is_mechanic %}
+        <div class="card-footer bg-transparent border-top-0 d-flex gap-2">
+          <a href="{% url 'piece_edit' piece.pk %}" class="btn btn-sm btn-outline-primary flex-grow-1">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </a>
+          <a href="{% url 'piece_delete' piece.pk %}" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash"></i>
+          </a>
+        </div>
+        {% elif is_owner %}
+        <div class="card-footer bg-transparent border-top-0">
+          <a href="{% url 'piece_buy' piece.pk %}" class="btn btn-sm btn-success w-100 {% if piece.quantite_stock <= 0 %}disabled{% endif %}">
+            <i class="bi bi-cart-plus me-1"></i>Buy Now
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="col-12 text-center py-5">
+      <div class="text-muted">
+        <i class="bi bi-inbox" style="font-size: 4rem; opacity: 0.3;"></i>
+        <p class="mt-3">No parts found in the inventory.</p>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .piece-card {
+    transition: transform 0.2s;
+  }
+  .piece-card:hover {
+    transform: translateY(-5px);
+  }
+  .extra-small {
+    font-size: 0.75rem;
+  }
+</style>
+{% endblock %}
