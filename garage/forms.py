@@ -126,6 +126,7 @@ class InterventionForm(forms.ModelForm):
             "etat",
             "cout_main_oeuvre",
             "kilometrage",
+            "problemes_futurs",
         ]
         widgets = {
             "mecanicien": forms.Select(attrs={"class": "form-select"}),
@@ -139,6 +140,7 @@ class InterventionForm(forms.ModelForm):
             "etat": forms.Select(attrs={"class": "form-select"}),
             "cout_main_oeuvre": forms.NumberInput(attrs={"class": "form-control"}),
             "kilometrage": forms.NumberInput(attrs={"class": "form-control"}),
+            "problemes_futurs": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Potential issues to watch out for..."}),
         }
 
     def __init__(self, *args, **kwargs):

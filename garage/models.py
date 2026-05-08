@@ -154,6 +154,7 @@ class Intervention(models.Model):
     etat               = models.CharField(max_length=20, choices=ETAT_CHOICES, default='planned')
     cout_main_oeuvre   = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     kilometrage        = models.IntegerField(verbose_name="Mileage at Service", default=0)
+    problemes_futurs   = models.TextField(null=True, blank=True, verbose_name="Future Potential Issues")
 
     # --- OPTIONAL FEATURE: Due Dates ---
     date_estimee_fin   = models.DateTimeField(null=True, blank=True, verbose_name="Estimated Completion")
