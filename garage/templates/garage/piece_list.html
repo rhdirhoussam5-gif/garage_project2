@@ -22,7 +22,17 @@
     <div class="col-md-6 col-lg-4 col-xl-3">
       <div class="card h-100 shadow-sm border-0 piece-card">
         {% if piece.photo %}
-          <img src="{{ piece.photo.url }}" class="card-img-top" alt="{{ piece.nom }}" style="height: 180px; object-fit: cover;">
+          <img src="{{ piece.photo.url }}" class="card-img-top piece-card-image" alt="{{ piece.nom }}">
+        {% elif piece.default_photo %}
+          <div class="piece-image-frame">
+            <img
+              src="{% static piece.default_photo %}"
+              class="card-img-top piece-card-image"
+              alt="{{ piece.nom }}"
+              onerror="this.closest('.piece-image-frame').classList.add('missing-image'); this.remove();"
+            >
+            <i class="bi bi-image missing-image-icon"></i>
+          </div>
         {% else %}
           <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
             <i class="bi bi-image" style="font-size: 3rem;"></i>
@@ -81,6 +91,27 @@
   }
   .piece-card:hover {
     transform: translateY(-5px);
+  }
+  .piece-image-frame {
+    height: 180px;
+    background: #f7f9fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .piece-card-image {
+    height: 180px;
+    width: 100%;
+    object-fit: contain;
+    padding: 18px;
+  }
+  .missing-image-icon {
+    display: none;
+    color: #6c757d;
+    font-size: 3rem;
+  }
+  .missing-image .missing-image-icon {
+    display: inline-block;
   }
   .extra-small {
     font-size: 0.75rem;

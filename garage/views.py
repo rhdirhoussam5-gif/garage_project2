@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from seed_pieces import get_seed_piece_images
+
 from .chatbot_utils import (
     ChatbotConfigurationError,
     ChatbotServiceError,
@@ -795,6 +797,9 @@ def export_history_pdf(request, matricule):
 @login_required
 def piece_list(request):
     pieces = Piece.objects.select_related('garage').order_by('nom')
+    seed_piece_images = get_seed_piece_images()
+    for piece in pieces:
+        piece.default_photo = seed_piece_images.get(piece.reference)
     return render(request, "garage/piece_list.html", {"pieces": pieces})
 
 
