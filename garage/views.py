@@ -1,12 +1,23 @@
 import io
+import json
+import logging
 
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
+from .chatbot_utils import (
+    ChatbotConfigurationError,
+    ChatbotServiceError,
+    build_vehicle_context,
+    call_groq_chatbot,
+    get_accessible_vehicles,
+    get_vehicle_for_chat,
+)
 from .forms import (
     DemandeForm,
     FacturationForm,
@@ -36,6 +47,78 @@ def user_home_url(user):
     if is_owner(user):
         return "client_dashboard"
     return "login"
+
+
+@login_required
+@require_POST
+def chatbot_reply(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    user_message = (payload.get("message") or "").strip()
+    vehicle_id = payload.get("vehicle_id") or None
+
+    if not user_message:
+        return JsonResponse({"error": "Message is required."}, status=400)
+
+    try:
+        vehicle = get_vehicle_for_chat(request.user, vehicle_id)
+    except (Vehicule.DoesNotExist, ValueError, TypeError):
+        return JsonResponse({"error": "Vehicle not found or not allowed."}, status=403)
+
+    accessible_vehicles = get_accessible_vehicles(request.user)
+
+    if vehicle is None and hasattr(request.user, "proprietaire") and accessible_vehicles.count() > 1:
+        return JsonResponse(
+            {
+                "error": "Please choose a vehicle first.",
+                "needs_vehicle": True,
+            },
+            status=400,
+        )
+
+    if hasattr(request.user, "mecanicien"):
+        role_context = "Connected user role: mechanic."
+        if vehicle is None:
+            role_context += " Mechanic mode with no selected vehicle."
+    elif hasattr(request.user, "proprietaire"):
+        role_context = "Connected user role: owner."
+    else:
+        role_context = "Connected user role: unknown."
+
+    context_text = f"{role_context}\n\n{build_vehicle_context(vehicle)}"
+
+    try:
+        reply = call_groq_chatbot(user_message, context_text)
+    except ChatbotConfigurationError as exc:
+        return JsonResponse({"error": str(exc)}, status=503)
+    except ChatbotServiceError as exc:
+        return JsonResponse({"error": str(exc)}, status=502)
+    except Exception:
+        logging.exception("Chatbot error")
+        return JsonResponse(
+            {
+                "error": "Chatbot service unavailable. Check GROQ_API_KEY and internet connection."
+            },
+            status=500,
+        )
+
+    return JsonResponse({"reply": reply})
+
+
+@login_required
+def chatbot_vehicles(request):
+    vehicles = get_accessible_vehicles(request.user).order_by("marque", "modele", "matricule")
+    data = [
+        {
+            "id": vehicle.id,
+            "label": f"{vehicle.marque} {vehicle.modele} ({vehicle.annee}) - {vehicle.matricule}",
+        }
+        for vehicle in vehicles
+    ]
+    return JsonResponse({"vehicles": data})
 
 
 def login_view(request):
